@@ -1,3 +1,4 @@
+xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -17,6 +18,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<sonar.scanner.force-deprecated-java-version>true</sonar.scanner.force-deprecated-java-version>
+		<maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -45,29 +47,25 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			
-			<!--plugin>
-			  <groupId>org.codehaus.sonar</groupId>
-			  <artifactId>sonar-maven-plugin</artifactId>
-			  <version>2.5</version>
-		     	</plugin-->
-			<!--plugin>
-   				<groupId>org.apache.maven.plugins</groupId>
-   				<artifactId>maven-deploy-plugin</artifactId>
-   				<version>${maven-deploy-plugin.version}</version>
-   			</plugin-->
+			<!-- Uncomment and add the deploy plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>${maven-deploy-plugin.version}</version>
+			</plugin>
 		</plugins>
 	</build>
 
 	<distributionManagement>
-    <snapshotRepository>
-      <id>nexusdeploymentrepo</id>
-      <url>http://10.128.0.3:8081/repository/java-webapp-snapshots/</url> <!-- Update the IP/Address to Your Nexus VM IP -->
-    </snapshotRepository>											  <!-- Mmake sure to create the "maven-snapshots" repo in Nexus -->
-	<repository>
-	  <id>nexusdeploymentrepo</id>
-      <url>http://10.128.0.3:8081/repository/java-webapp-releases/</url> <!-- Update the IP/Address to Your Nexus VM IP -->
-    </repository>													 <!-- Also make sure you have the above two or one repositories created -->
-  
-  </distributionManagement>
-
+		<snapshotRepository>
+			<id>nexusdeploymentrepo</id>
+			<name>Nexus Snapshot Repository</name>
+			<url>http://10.128.0.3:8081/repository/java-webapp-snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>nexusdeploymentrepo</id>
+			<name>Nexus Release Repository</name>
+			<url>http://10.128.0.3:8081/repository/java-webapp-releases/</url>
+		</repository>
+	</distributionManagement>
 </project>

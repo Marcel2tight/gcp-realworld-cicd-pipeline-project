@@ -26,21 +26,36 @@ pipeline {
                 sh 'mvn checkstyle:checkstyle'
             }
         }
+        
+        // SECURE SONARQUBE INSPECTION
         stage('SonarQube Inspection') {
             steps {
-                sh  """mvn clean verify sonar:sonar \
-                        -Dsonar.projectKey=java-webapp \
-                        -Dsonar.host.url=http://10.128.0.3:9000 \
-                        -Dsonar.login=sqp_a7c60123f30fdb83e8398b76accf61c24d331c29"""
+                withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                    sh """mvn clean verify sonar:sonar \\
+                        -Dsonar.projectKey=java-webapp \\
+                        -Dsonar.host.url=http://10.128.0.3:9000 \\
+                        -Dsonar.login=\${SONAR_TOKEN}"""
+                }
             }
         }
+        
+        // SECURE NEXUS DEPLOYMENT - UPDATED
         stage("Upload Artifact To Nexus"){
-            steps{
-                 sh 'mvn deploy'
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'nexusdeploymentrepo', 
+                        usernameVariable: 'NEXUS_USERNAME',
+                        passwordVariable: 'NEXUS_PASSWORD'
+                    )
+                ]) {
+                    // Use clean deploy instead of package deploy
+                    sh 'mvn clean deploy'
+                }
             }
             post {
                 success {
-                  echo 'Successfully Uploaded Artifact to Nexus Artifactory'
+                    echo 'Successfully Uploaded Artifact to Nexus Artifactory'
                 }
             }
         }
