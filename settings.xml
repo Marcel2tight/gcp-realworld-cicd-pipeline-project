@@ -71,7 +71,7 @@ under the License.
        <repository>
          <id>nexus-release-repo</id>
          <name>your custom repo</name>
-         <url>http://10.128.0.2:8081/repository/maven-releases/</url>
+         <url>http://10.128.0.3:8081/repository/java-webapp-snapshots//</url>
        </repository>
      </repositories>
    </profile>
