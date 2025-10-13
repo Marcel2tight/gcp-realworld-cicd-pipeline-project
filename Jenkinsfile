@@ -36,8 +36,8 @@ pipeline {
         }
         stage("Upload Artifact To Nexus"){
             steps{
-                 sh 'mvn deploy -DaltDeploymentRepository=nexusdeploymentrepo : :default : :http: //admin:adminadmin@10.128.0.7:8081/repository/java-webapp-snapshots/'
-            }
+                sh 'mvn deploy -DaltDeploymentRepository=nexusdeploymentrepo::default::http://admin:adminadmin@10.128.0.7:8081/repository/java-webapp-snapshots/'
+    }
             post {
                 success {
                   echo 'Successfully Uploaded Artifact to Nexus Artifactory'
