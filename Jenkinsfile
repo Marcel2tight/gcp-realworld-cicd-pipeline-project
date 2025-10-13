@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        maven 'M3'
+        maven 'M3'  // This should now work
     }
     stages {
         stage("Build") {
@@ -18,14 +18,6 @@ pipeline {
                         echo "✓ Nexus is reachable"
                     else
                         echo "✗ Cannot reach Nexus"
-                        exit 1
-                    fi
-                    
-                    echo "Testing repository access..."
-                    if curl -s -u admin:adminadmin http://10.128.0.7:8081/repository/java-webapp-snapshots/ > /dev/null; then
-                        echo "✓ Repository is accessible"
-                    else
-                        echo "✗ Cannot access repository - check permissions"
                         exit 1
                     fi
                 '''
@@ -49,16 +41,13 @@ pipeline {
                     </settings>
                     EOF
                     
-                    # Deploy with detailed logging
-                    mvn -B deploy -s settings.xml -X
+                    # Deploy
+                    mvn deploy -s settings.xml
                 '''
             }
             post {
                 success {
                     echo 'Successfully Uploaded Artifact to Nexus Artifactory'
-                }
-                failure {
-                    echo 'Failed to upload artifact - check Nexus logs and permissions'
                 }
             }
         }
