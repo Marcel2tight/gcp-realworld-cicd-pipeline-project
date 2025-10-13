@@ -1,53 +1,46 @@
 pipeline {
     agent any
-    tools {
-        maven 'M3'  // This should now work
-    }
     stages {
-        stage("Build") {
+        stage('Validate Project') {
             steps {
-                sh 'mvn clean compile'
+                sh 'mvn validate'
             }
         }
-        
-        stage("Test Nexus Connection") {
+        stage('Unit Test'){
             steps {
-                sh '''
-                    echo "Testing basic Nexus connectivity..."
-                    if curl -s -u admin:adminadmin http://10.128.0.7:8081/ > /dev/null; then
-                        echo "✓ Nexus is reachable"
-                    else
-                        echo "✗ Cannot reach Nexus"
-                        exit 1
-                    fi
-                '''
+                sh 'mvn test'
             }
         }
-        
-        stage("Upload Artifact To Nexus") {
+        stage('Integration Test'){
             steps {
-                sh '''
-                    # Create settings.xml with credentials
-                    cat > settings.xml << 'EOF'
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <settings>
-                      <servers>
-                        <server>
-                          <id>nexusdeploymentrepo</id>
-                          <username>admin</username>
-                          <password>adminadmin</password>
-                        </server>
-                      </servers>
-                    </settings>
-                    EOF
-                    
-                    # Deploy
-                    mvn deploy -s settings.xml
-                '''
+                sh 'mvn verify -DskipUnitTests'
+            }
+        }
+        stage('App Packaging'){
+            steps {
+                sh 'mvn package'
+            }
+        }
+        stage ('Checkstyle Code Analysis'){
+            steps {
+                sh 'mvn checkstyle:checkstyle'
+            }
+        }
+        stage('SonarQube Inspection') {
+            steps {
+                sh  """mvn clean verify sonar:sonar \
+                        -Dsonar.projectKey=java-webapp \
+                        -Dsonar.host.url=http://10.128.0.7:9000 \
+                        -Dsonar.login=sqp_39f4a576f2be6657a3ddad65a036e82e0ec20dea"""
+            }
+        }
+        stage("Upload Artifact To Nexus"){
+            steps{
+                 sh 'mvn deploy'
             }
             post {
                 success {
-                    echo 'Successfully Uploaded Artifact to Nexus Artifactory'
+                  echo 'Successfully Uploaded Artifact to Nexus Artifactory'
                 }
             }
         }
