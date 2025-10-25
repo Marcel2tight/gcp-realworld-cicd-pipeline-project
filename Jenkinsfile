@@ -13,7 +13,6 @@ pipeline {
         }
         stage('Integration Test'){
             steps {
-                // Ensure unit tests are skipped as they ran in the previous stage
                 sh 'mvn verify -DskipUnitTests'
             }
         }
@@ -39,34 +38,21 @@ pipeline {
             steps{
                 sh 'mvn deploy'
             }
-            post {
-                success {
-                    echo 'Successfully Uploaded Artifact to Nexus Artifactory'
-                }
-            }
         }
 
-        // --- DEPLOYMENT STAGES WITH ANSIBLE ---
-
+        // --- DEPLOYMENT STAGES ---
         stage('Deploy to DEV') {
             steps {
                 echo 'Deploying artifact to the DEV environment...'
                 sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit dev --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
-            post {
-                success {
-                    echo '✅ DEV deployment completed successfully!'
-                    sh 'ansible dev -a "systemctl is-active JavaWebApp" -u ansadmin --private-key=/var/lib/jenkins/.ssh/ansible_key'
-                }
-            }
         }
 
         stage('Approval for STAGE Deployment') {
             steps {
-                // Wait for manual approval before proceeding to the Stage environment
                 timeout(time: 30, unit: 'MINUTES') {
-                    input message: 'Promote to STAGE environment? Requires QA/Tester approval.',
-                          submitter: 'testers,qa-team' // Specify groups or users allowed to approve
+                    input message: 'Promote to STAGE environment?',
+                          submitter: 'testers,qa-team'
                 }
             }
         }
@@ -76,20 +62,13 @@ pipeline {
                 echo 'Deploying artifact to the STAGE environment...'
                 sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit stage --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
-            post {
-                success {
-                    echo '✅ STAGE deployment completed successfully!'
-                    sh 'ansible stage -a "systemctl is-active JavaWebApp" -u ansadmin --private-key=/var/lib/jenkins/.ssh/ansible_key'
-                }
-            }
         }
 
         stage('Approval for PROD Deployment') {
             steps {
-                // Wait for manual approval before proceeding to the Production environment
                 timeout(time: 30, unit: 'MINUTES') {
-                    input message: 'Final approval: Promote to PRODUCTION environment? Requires Management/Release Team approval.',
-                          submitter: 'managers,release-team' // Specify groups or users allowed to approve
+                    input message: 'Final approval: Promote to PRODUCTION?',
+                          submitter: 'managers,release-team'
                 }
             }
         }
@@ -99,15 +78,8 @@ pipeline {
                 echo 'Deploying artifact to the PRODUCTION environment... 🚀'
                 sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit prod --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
-            post {
-                success {
-                    echo '✅ PROD deployment completed successfully!'
-                    sh 'ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin --private-key=/var/lib/jenkins/.ssh/ansible_key'
-                }
-            }
         }
 
-        // --- ROLLBACK SAFETY NET ---
         stage('Rollback if Needed') {
             when {
                 expression { currentBuild.result == 'FAILURE' }
@@ -116,27 +88,41 @@ pipeline {
                 echo '🚨 Deployment failed! Initiating automatic rollback...'
                 sh 'ansible-playbook /etc/ansible/playbooks/rollback-springboot.yml --limit prod --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
-            post {
-                success {
-                    echo '✅ Rollback safety check completed'
-                    sh 'ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin --private-key=/var/lib/jenkins/.ssh/ansible_key'
-                }
-                failure {
-                    echo '❌ Rollback failed! Manual intervention required.'
-                }
-            }
         }
     }
     
     post {
         always {
             echo "Pipeline execution completed for build ${env.BUILD_NUMBER}"
+            
+            // Direct Slack notification
+            sh """
+            curl -s -X POST -H 'Content-type: application/json' \
+            --data '{"text":"🚀 ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}\\n🔗 ${env.BUILD_URL}"}' \
+            https://hooks.slack.com/services/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
+            """
         }
+        
         success {
             echo "🎉 All stages completed successfully!"
+            
+            // Success notification
+            sh """
+            curl -s -X POST -H 'Content-type: application/json' \
+            --data '{"text":"✅ DEPLOYMENT SUCCESS!\\nApplication: JavaWebApp\\nBuild: #${env.BUILD_NUMBER}\\nEnvironments: ✅ Dev → ✅ Stage → ✅ Prod\\nTime: $(date)"}' \
+            https://hooks.slack.com/services/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
+            """
         }
+        
         failure {
             echo "❌ Pipeline failed at stage ${env.STAGE_NAME}"
+            
+            // Failure notification
+            sh """
+            curl -s -X POST -H 'Content-type: application/json' \
+            --data '{"text":"❌ DEPLOYMENT FAILED!\\nBuild: #${env.BUILD_NUMBER}\\nApplication: JavaWebApp\\nFailed Stage: ${env.STAGE_NAME}\\nURL: ${env.BUILD_URL}"}' \
+            https://hooks.slack.com/services/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
+            """
         }
     }
 }
