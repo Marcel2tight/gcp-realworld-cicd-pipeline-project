@@ -46,13 +46,18 @@ pipeline {
             }
         }
 
-        // --- NEW DEPLOYMENT STAGES BELOW ---
+        // --- DEPLOYMENT STAGES WITH ANSIBLE ---
 
         stage('Deploy to DEV') {
             steps {
                 echo 'Deploying artifact to the DEV environment...'
-                // Placeholder for your actual deployment script (e.g., Ansible, shell, custom script)
-                // sh './deploy-dev.sh'
+                sh 'sudo ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit dev'
+            }
+            post {
+                success {
+                    echo '✅ DEV deployment completed successfully!'
+                    sh 'sudo ansible dev -a "systemctl is-active JavaWebApp" -u ansadmin'
+                }
             }
         }
 
@@ -69,8 +74,13 @@ pipeline {
         stage('Deploy to STAGE') {
             steps {
                 echo 'Deploying artifact to the STAGE environment...'
-                // Placeholder for your actual deployment script
-                // sh './deploy-stage.sh'
+                sh 'sudo ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit stage'
+            }
+            post {
+                success {
+                    echo '✅ STAGE deployment completed successfully!'
+                    sh 'sudo ansible stage -a "systemctl is-active JavaWebApp" -u ansadmin'
+                }
             }
         }
 
@@ -87,17 +97,46 @@ pipeline {
         stage('Deploy to PROD') {
             steps {
                 echo 'Deploying artifact to the PRODUCTION environment... 🚀'
-                // Placeholder for your actual deployment script
-                // sh './deploy-prod.sh'
+                sh 'sudo ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit prod'
             }
             post {
                 success {
-                    echo ' Deployment to PROD completed successfully!'
-                }
-                failure {
-                    echo ' PROD deployment failed! Immediate review required.'
+                    echo '✅ PROD deployment completed successfully!'
+                    sh 'sudo ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin'
                 }
             }
+        }
+
+        // --- ROLLBACK SAFETY NET ---
+        stage('Rollback if Needed') {
+            when {
+                expression { currentBuild.result == 'FAILURE' }
+            }
+            steps {
+                echo '🚨 Deployment failed! Initiating automatic rollback...'
+                sh 'sudo ansible-playbook /etc/ansible/playbooks/rollback-springboot.yml --limit prod'
+            }
+            post {
+                success {
+                    echo '✅ Rollback safety check completed'
+                    sh 'sudo ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin'
+                }
+                failure {
+                    echo '❌ Rollback failed! Manual intervention required.'
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo "Pipeline execution completed for build ${env.BUILD_NUMBER}"
+        }
+        success {
+            echo "🎉 All stages completed successfully!"
+        }
+        failure {
+            echo "❌ Pipeline failed at stage ${env.STAGE_NAME}"
         }
     }
 }
