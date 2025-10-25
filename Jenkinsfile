@@ -51,12 +51,12 @@ pipeline {
         stage('Deploy to DEV') {
             steps {
                 echo 'Deploying artifact to the DEV environment...'
-                sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit dev'
+                sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit dev --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
             post {
                 success {
                     echo '✅ DEV deployment completed successfully!'
-                    sh 'ansible dev -a "systemctl is-active JavaWebApp" -u ansadmin'
+                    sh 'ansible dev -a "systemctl is-active JavaWebApp" -u ansadmin --private-key=/var/lib/jenkins/.ssh/ansible_key'
                 }
             }
         }
@@ -74,12 +74,12 @@ pipeline {
         stage('Deploy to STAGE') {
             steps {
                 echo 'Deploying artifact to the STAGE environment...'
-                sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit stage'
+                sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit stage --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
             post {
                 success {
                     echo '✅ STAGE deployment completed successfully!'
-                    sh 'ansible stage -a "systemctl is-active JavaWebApp" -u ansadmin'
+                    sh 'ansible stage -a "systemctl is-active JavaWebApp" -u ansadmin --private-key=/var/lib/jenkins/.ssh/ansible_key'
                 }
             }
         }
@@ -97,12 +97,12 @@ pipeline {
         stage('Deploy to PROD') {
             steps {
                 echo 'Deploying artifact to the PRODUCTION environment... 🚀'
-                sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit prod'
+                sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit prod --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
             post {
                 success {
                     echo '✅ PROD deployment completed successfully!'
-                    sh 'ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin'
+                    sh 'ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin --private-key=/var/lib/jenkins/.ssh/ansible_key'
                 }
             }
         }
@@ -114,12 +114,12 @@ pipeline {
             }
             steps {
                 echo '🚨 Deployment failed! Initiating automatic rollback...'
-                sh 'ansible-playbook /etc/ansible/playbooks/rollback-springboot.yml --limit prod'
+                sh 'ansible-playbook /etc/ansible/playbooks/rollback-springboot.yml --limit prod --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
             post {
                 success {
                     echo '✅ Rollback safety check completed'
-                    sh 'ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin'
+                    sh 'ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin --private-key=/var/lib/jenkins/.ssh/ansible_key'
                 }
                 failure {
                     echo '❌ Rollback failed! Manual intervention required.'
