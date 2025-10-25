@@ -51,12 +51,12 @@ pipeline {
         stage('Deploy to DEV') {
             steps {
                 echo 'Deploying artifact to the DEV environment...'
-                sh 'sudo ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit dev'
+                sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit dev'
             }
             post {
                 success {
                     echo '✅ DEV deployment completed successfully!'
-                    sh 'sudo ansible dev -a "systemctl is-active JavaWebApp" -u ansadmin'
+                    sh 'ansible dev -a "systemctl is-active JavaWebApp" -u ansadmin'
                 }
             }
         }
@@ -74,12 +74,12 @@ pipeline {
         stage('Deploy to STAGE') {
             steps {
                 echo 'Deploying artifact to the STAGE environment...'
-                sh 'sudo ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit stage'
+                sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit stage'
             }
             post {
                 success {
                     echo '✅ STAGE deployment completed successfully!'
-                    sh 'sudo ansible stage -a "systemctl is-active JavaWebApp" -u ansadmin'
+                    sh 'ansible stage -a "systemctl is-active JavaWebApp" -u ansadmin'
                 }
             }
         }
@@ -97,12 +97,12 @@ pipeline {
         stage('Deploy to PROD') {
             steps {
                 echo 'Deploying artifact to the PRODUCTION environment... 🚀'
-                sh 'sudo ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit prod'
+                sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit prod'
             }
             post {
                 success {
                     echo '✅ PROD deployment completed successfully!'
-                    sh 'sudo ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin'
+                    sh 'ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin'
                 }
             }
         }
@@ -114,12 +114,12 @@ pipeline {
             }
             steps {
                 echo '🚨 Deployment failed! Initiating automatic rollback...'
-                sh 'sudo ansible-playbook /etc/ansible/playbooks/rollback-springboot.yml --limit prod'
+                sh 'ansible-playbook /etc/ansible/playbooks/rollback-springboot.yml --limit prod'
             }
             post {
                 success {
                     echo '✅ Rollback safety check completed'
-                    sh 'sudo ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin'
+                    sh 'ansible prod -a "systemctl is-active JavaWebApp" -u ansadmin'
                 }
                 failure {
                     echo '❌ Rollback failed! Manual intervention required.'
