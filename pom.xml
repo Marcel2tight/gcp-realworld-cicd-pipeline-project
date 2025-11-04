@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.3.RELEASE</version>
+		<version>2.7.18</version>  <!-- Updated for better monitoring support -->
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
@@ -24,6 +24,18 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
+		<!-- === ADD MONITORING DEPENDENCIES HERE === -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<!-- === END MONITORING DEPENDENCIES === -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -61,11 +73,11 @@
 	<distributionManagement>
     <snapshotRepository>
       <id>nexusdeploymentrepo</id>
-      <url>http://10.128.0.7:8081/repository/java-webapp-snapshots/</url> <!-- Update the IP/Address to Your Nexus VM IP -->
+      <url>http://10.128.0.6:8081/repository/java-webapp-snapshots/</url> <!-- Update the IP/Address to Your Nexus VM IP -->
     </snapshotRepository>											  <!-- Mmake sure to create the "maven-snapshots" repo in Nexus -->
 	<repository>
 	  <id>nexusdeploymentrepo</id>
-      <url>http://10.128.0.7:8081/repository/java-webapp-releases/</url> <!-- Update the IP/Address to Your Nexus VM IP -->
+      <url>http://10.128.0.6:8081/repository/java-webapp-releases/</url> <!-- Update the IP/Address to Your Nexus VM IP -->
     </repository>													 <!-- Also make sure you have the above two or one repositories created -->
   
   </distributionManagement>
