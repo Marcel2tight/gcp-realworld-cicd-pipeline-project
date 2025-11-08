@@ -11,11 +11,20 @@ pipeline {
         stage('Pipeline Started') {
             steps {
                 withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK_URL')]) {
-                    sh """
-                        curl -s -X POST -H "Content-type: application/json" \\
-                        --data '{"channel":"${env.SLACK_CHANNEL}", "text":"🚀 DEPLOYMENT PIPELINE STARTED\\\\n*Application:* JavaWebApp\\\\n*Build:* #${env.BUILD_NUMBER}\\\\n*Branch:* ${env.GIT_BRANCH}\\\\n*Initiator:* ${env.USER_ID}"}' \\
-                        ${SLACK_WEBHOOK_URL}
-                    """
+                    script {
+                        def message = """
+🚀 DEPLOYMENT PIPELINE STARTED
+*Application:* JavaWebApp
+*Build:* #${env.BUILD_NUMBER}
+*Branch:* ${env.GIT_BRANCH}
+*Initiator:* ${env.USER_ID}
+"""
+                        sh """
+                            curl -s -X POST -H "Content-type: application/json" \
+                            --data '{"channel":"${env.SLACK_CHANNEL}", "text":"${message}"}' \
+                            '${SLACK_WEBHOOK_URL}'
+                        """
+                    }
                 }
             }
         }
@@ -34,7 +43,6 @@ pipeline {
         
         stage('Integration Test') {
             steps {
-                // Ensure unit tests are skipped as they ran in the previous stage
                 sh 'mvn verify -DskipUnitTests'
             }
         }
@@ -55,12 +63,10 @@ pipeline {
             steps {
                 retry(2) {
                     timeout(time: 15, unit: 'MINUTES') {
-                        withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                        withSonarQubeEnv('sonarqube') {
                             sh """
-                            mvn clean verify sonar:sonar \\
-                                -Dsonar.projectKey=java-webapp \\
-                                -Dsonar.host.url=http://10.128.0.7:9000 \\
-                                -Dsonar.login=${SONAR_TOKEN}
+                            mvn clean verify sonar:sonar \
+                                -Dsonar.projectKey=java-webapp
                             """
                         }
                     }
