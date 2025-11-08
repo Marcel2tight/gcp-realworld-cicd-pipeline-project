@@ -204,13 +204,13 @@ pipeline {
 *Application:* JavaWebApp
 *Build:* #${env.BUILD_NUMBER}
 *Environments:* ✅ Dev → ✅ Stage → ✅ Prod
-*Time:* $(date)
 *URL:* ${env.BUILD_URL}
 """
                     def webhook = env.SLACK_WEBHOOK_URL
                     sh """
+                        current_time=\\$(date)
                         curl -s -X POST -H "Content-type: application/json" \
-                        --data '{"channel":"${env.SLACK_CHANNEL}", "text":"${message}"}' \
+                        --data '{"channel":"${env.SLACK_CHANNEL}", "text":"✅ DEPLOYMENT SUCCESS!\\\\n*Application:* JavaWebApp\\\\n*Build:* #${env.BUILD_NUMBER}\\\\n*Environments:* ✅ Dev → ✅ Stage → ✅ Prod\\\\n*Time:* \\\\${current_time}\\\\n*URL:* ${env.BUILD_URL}"}' \
                         '${webhook}'
                     """
                 }
@@ -221,18 +221,11 @@ pipeline {
             echo "❌ Pipeline failed at stage ${env.STAGE_NAME}"
             withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK_URL')]) {
                 script {
-                    def message = """
-❌ DEPLOYMENT FAILED!
-*Build:* #${env.BUILD_NUMBER}
-*Application:* JavaWebApp
-*Failed Stage:* ${env.STAGE_NAME}
-*URL:* ${env.BUILD_URL}
-*Time:* $(date)
-"""
                     def webhook = env.SLACK_WEBHOOK_URL
                     sh """
+                        current_time=\\$(date)
                         curl -s -X POST -H "Content-type: application/json" \
-                        --data '{"channel":"${env.SLACK_CHANNEL}", "text":"${message}"}' \
+                        --data '{"channel":"${env.SLACK_CHANNEL}", "text":"❌ DEPLOYMENT FAILED!\\\\n*Build:* #${env.BUILD_NUMBER}\\\\n*Application:* JavaWebApp\\\\n*Failed Stage:* ${env.STAGE_NAME}\\\\n*URL:* ${env.BUILD_URL}\\\\n*Time:* \\\\${current_time}"}' \
                         '${webhook}'
                     """
                 }
