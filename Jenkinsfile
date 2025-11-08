@@ -11,7 +11,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK')]) {
                     sh """
                     curl -s -X POST -H 'Content-type: application/json' \
-                    --data '{"channel":"${env.SLACK_CHANNEL}","text":"íº€ DEPLOYMENT PIPELINE STARTED\\n*Application:* JavaWebApp\\n*Build:* #${env.BUILD_NUMBER}\\n*Branch:* ${env.GIT_BRANCH}\\n*Initiator:* ${env.USER_ID}"}' \
+                    --data '{"channel":"${env.SLACK_CHANNEL}","text":"ï¿½ï¿½ï¿½ DEPLOYMENT PIPELINE STARTED\\n*Application:* JavaWebApp\\n*Build:* #${env.BUILD_NUMBER}\\n*Branch:* ${env.GIT_BRANCH}\\n*Initiator:* ${env.USER_ID}"}' \
                     ${SLACK_WEBHOOK}
                     """
                 }
@@ -119,7 +119,7 @@ pipeline {
 
         stage('Deploy to PROD') {
             steps {
-                echo 'Deploying artifact to the PRODUCTION environment... íº€'
+                echo 'Deploying artifact to the PRODUCTION environment... ï¿½ï¿½ï¿½'
                 sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit prod --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
             post {
@@ -136,7 +136,7 @@ pipeline {
                 expression { currentBuild.result == 'FAILURE' }
             }
             steps {
-                echo 'íº¨ Deployment failed! Initiating automatic rollback...'
+                echo 'ï¿½ï¿½ï¿½ Deployment failed! Initiating automatic rollback...'
                 sh 'ansible-playbook /etc/ansible/playbooks/rollback-springboot.yml --limit prod --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
             post {
@@ -157,14 +157,14 @@ pipeline {
             withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK')]) {
                 sh """
                 curl -s -X POST -H 'Content-type: application/json' \
-                --data '{"channel":"${env.SLACK_CHANNEL}","text":"íº€ ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}\\ní´— ${env.BUILD_URL}"}' \
+                --data '{"channel":"${env.SLACK_CHANNEL}","text":"ï¿½ï¿½ï¿½ ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}\\nï¿½ï¿½ï¿½ ${env.BUILD_URL}"}' \
                 ${SLACK_WEBHOOK}
                 """
             }
         }
         
         success {
-            echo "í¾‰ All stages completed successfully!"
+            echo "ï¿½ï¿½ï¿½ All stages completed successfully!"
             withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK')]) {
                 sh """
                 curl -s -X POST -H 'Content-type: application/json' \
@@ -211,7 +211,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK')]) {
                     sh """
                     curl -s -X POST -H 'Content-type: application/json' \
-                    --data '{"channel":"${env.SLACK_CHANNEL}","text":"íº€ DEPLOYMENT PIPELINE STARTED\\n*Application:* JavaWebApp\\n*Build:* #${env.BUILD_NUMBER}\\n*Branch:* ${env.GIT_BRANCH}\\n*Initiator:* ${env.USER_ID}"}' \
+                    --data '{"channel":"${env.SLACK_CHANNEL}","text":"ï¿½ï¿½ï¿½ DEPLOYMENT PIPELINE STARTED\\n*Application:* JavaWebApp\\n*Build:* #${env.BUILD_NUMBER}\\n*Branch:* ${env.GIT_BRANCH}\\n*Initiator:* ${env.USER_ID}"}' \
                     ${SLACK_WEBHOOK}
                     """
                 }
@@ -254,7 +254,7 @@ pipeline {
                 sh """mvn clean verify sonar:sonar \
                         -Dsonar.projectKey=java-webapp \
                         -Dsonar.host.url=http://10.128.0.7:9000 \
-                        -Dsonar.login=sqp_39f4a576f2be6657a3ddad65a036e82e0ec20dea"""
+                        -Dsonar.login=sqp_7aa029441db9e097c8fc55c8e870b18807cd529f"""
             }
         }
         
@@ -319,7 +319,7 @@ pipeline {
 
         stage('Deploy to PROD') {
             steps {
-                echo 'Deploying artifact to the PRODUCTION environment... íº€'
+                echo 'Deploying artifact to the PRODUCTION environment... ï¿½ï¿½ï¿½'
                 sh 'ansible-playbook /etc/ansible/playbooks/deploy-springboot.yml --limit prod --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
             post {
@@ -336,7 +336,7 @@ pipeline {
                 expression { currentBuild.result == 'FAILURE' }
             }
             steps {
-                echo 'íº¨ Deployment failed! Initiating automatic rollback...'
+                echo 'ï¿½ï¿½ï¿½ Deployment failed! Initiating automatic rollback...'
                 sh 'ansible-playbook /etc/ansible/playbooks/rollback-springboot.yml --limit prod --private-key=/var/lib/jenkins/.ssh/ansible_key'
             }
             post {
@@ -357,14 +357,14 @@ pipeline {
             withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK')]) {
                 sh """
                 curl -s -X POST -H 'Content-type: application/json' \
-                --data '{"channel":"${env.SLACK_CHANNEL}","text":"íº€ ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}\\ní´— ${env.BUILD_URL}"}' \
+                --data '{"channel":"${env.SLACK_CHANNEL}","text":"ï¿½ï¿½ï¿½ ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}\\nï¿½ï¿½ï¿½ ${env.BUILD_URL}"}' \
                 ${SLACK_WEBHOOK}
                 """
             }
         }
         
         success {
-            echo "í¾‰ All stages completed successfully!"
+            echo "ï¿½ï¿½ï¿½ All stages completed successfully!"
             withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK')]) {
                 sh """
                 curl -s -X POST -H 'Content-type: application/json' \
