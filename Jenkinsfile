@@ -11,11 +11,11 @@ pipeline {
         stage('Pipeline Started') {
             steps {
                 withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK_URL')]) {
-                    sh '''
-                        curl -s -X POST -H "Content-type: application/json" \
-                        --data '{"channel":"'${env.SLACK_CHANNEL}'","text":"🚀 DEPLOYMENT PIPELINE STARTED\n*Application:* JavaWebApp\n*Build:* #'${env.BUILD_NUMBER}'\n*Branch:* '${env.GIT_BRANCH}'\n*Initiator:* '${env.USER_ID}'"}' \
+                    sh """
+                        curl -s -X POST -H "Content-type: application/json" \\
+                        --data '{"channel":"${env.SLACK_CHANNEL}", "text":"🚀 DEPLOYMENT PIPELINE STARTED\\\\n*Application:* JavaWebApp\\\\n*Build:* #${env.BUILD_NUMBER}\\\\n*Branch:* ${env.GIT_BRANCH}\\\\n*Initiator:* ${env.USER_ID}"}' \\
                         ${SLACK_WEBHOOK_URL}
-                    '''
+                    """
                 }
             }
         }
@@ -57,9 +57,9 @@ pipeline {
                     timeout(time: 15, unit: 'MINUTES') {
                         withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
                             sh """
-                            mvn clean verify sonar:sonar \
-                                -Dsonar.projectKey=java-webapp \
-                                -Dsonar.host.url=http://10.128.0.7:9000 \
+                            mvn clean verify sonar:sonar \\
+                                -Dsonar.projectKey=java-webapp \\
+                                -Dsonar.host.url=http://10.128.0.7:9000 \\
                                 -Dsonar.login=${SONAR_TOKEN}
                             """
                         }
@@ -173,44 +173,44 @@ pipeline {
         always {
             echo "Pipeline execution completed for build ${env.BUILD_NUMBER}"
             withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK_URL')]) {
-                sh '''
-                    curl -s -X POST -H "Content-type: application/json" \
-                    --data '{"channel":"'${env.SLACK_CHANNEL}'","text":"🔔 '${env.JOB_NAME}' - Build #'${env.BUILD_NUMBER}' - '${currentBuild.currentResult}'\n🔗 '${env.BUILD_URL}'"}' \
+                sh """
+                    curl -s -X POST -H "Content-type: application/json" \\
+                    --data '{"channel":"${env.SLACK_CHANNEL}", "text":"🔔 ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}\\\\n🔗 ${env.BUILD_URL}"}' \\
                     ${SLACK_WEBHOOK_URL}
-                '''
+                """
             }
         }
         
         success {
             echo "🎉 All stages completed successfully!"
             withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK_URL')]) {
-                sh '''
-                    curl -s -X POST -H "Content-type: application/json" \
-                    --data '{"channel":"'${env.SLACK_CHANNEL}'","text":"✅ DEPLOYMENT SUCCESS!\n*Application:* JavaWebApp\n*Build:* #'${env.BUILD_NUMBER}'\n*Environments:* ✅ Dev → ✅ Stage → ✅ Prod\n*Time:* $(date)\n*URL:* '${env.BUILD_URL}'"}' \
+                sh """
+                    curl -s -X POST -H "Content-type: application/json" \\
+                    --data '{"channel":"${env.SLACK_CHANNEL}", "text":"✅ DEPLOYMENT SUCCESS!\\\\n*Application:* JavaWebApp\\\\n*Build:* #${env.BUILD_NUMBER}\\\\n*Environments:* ✅ Dev → ✅ Stage → ✅ Prod\\\\n*Time:* \$(date)\\\\n*URL:* ${env.BUILD_URL}"}' \\
                     ${SLACK_WEBHOOK_URL}
-                '''
+                """
             }
         }
         
         failure {
             echo "❌ Pipeline failed at stage ${env.STAGE_NAME}"
             withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK_URL')]) {
-                sh '''
-                    curl -s -X POST -H "Content-type: application/json" \
-                    --data '{"channel":"'${env.SLACK_CHANNEL}'","text":"❌ DEPLOYMENT FAILED!\n*Build:* #'${env.BUILD_NUMBER}'\n*Application:* JavaWebApp\n*Failed Stage:* '${env.STAGE_NAME}'\n*URL:* '${env.BUILD_URL}'\n*Time:* $(date)"}' \
+                sh """
+                    curl -s -X POST -H "Content-type: application/json" \\
+                    --data '{"channel":"${env.SLACK_CHANNEL}", "text":"❌ DEPLOYMENT FAILED!\\\\n*Build:* #${env.BUILD_NUMBER}\\\\n*Application:* JavaWebApp\\\\n*Failed Stage:* ${env.STAGE_NAME}\\\\n*URL:* ${env.BUILD_URL}\\\\n*Time:* \$(date)"}' \\
                     ${SLACK_WEBHOOK_URL}
-                '''
+                """
             }
         }
         
         unstable {
             echo "⚠️ Pipeline is unstable"
             withCredentials([string(credentialsId: 'slack-webhook-url', variable: 'SLACK_WEBHOOK_URL')]) {
-                sh '''
-                    curl -s -X POST -H "Content-type: application/json" \
-                    --data '{"channel":"'${env.SLACK_CHANNEL}'","text":"⚠️ BUILD UNSTABLE\n*Build:* #'${env.BUILD_NUMBER}'\n*Application:* JavaWebApp\n*URL:* '${env.BUILD_URL}'"}' \
+                sh """
+                    curl -s -X POST -H "Content-type: application/json" \\
+                    --data '{"channel":"${env.SLACK_CHANNEL}", "text":"⚠️ BUILD UNSTABLE\\\\n*Build:* #${env.BUILD_NUMBER}\\\\n*Application:* JavaWebApp\\\\n*URL:* ${env.BUILD_URL}"}' \\
                     ${SLACK_WEBHOOK_URL}
-                '''
+                """
             }
         }
     }
