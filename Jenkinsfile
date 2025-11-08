@@ -3,6 +3,8 @@ pipeline {
     
     environment {
         SLACK_CHANNEL = '#deployments'
+        NEXUS_USERNAME = credentials('nexus-username')
+        NEXUS_PASSWORD = credentials('nexus-password')
     }
     
     stages {
